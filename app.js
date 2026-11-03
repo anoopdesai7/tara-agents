@@ -1,3 +1,4 @@
+import { paperDetails, bindPaperDetails } from "./paper-details.js";
 const STORE = "tara-field-guide-v1";
 
 const papers = [
@@ -373,7 +374,8 @@ function paperPage(paper) {
   return `<article class="page"><header class="paper-hero"><div class="eyebrow">Core paper · ${paper.number}</div><h1 class="paper-title">${paper.title}</h1><p class="lede">${paper.oneLine}</p>
     <div class="page-meta"><span class="tag accent">${paper.year}</span><span class="tag">${paper.venue}</span><span class="tag">${paper.authors}</span></div>
     <div class="hero-actions"><a class="button primary" href="${paper.link}" target="_blank" rel="noreferrer">Read primary source ↗</a><a class="button ghost" href="${paper.pdf}" target="_blank" rel="noreferrer">Open paper / PDF</a></div></header>
-    <section class="prose"><h2>Why it belongs in your roadmap</h2><p>${paper.why}</p><h2>Method in three moves</h2><div class="steps">${paper.method.map(item => `<div class="step"><p>${item}</p></div>`).join("")}</div></section>
+    <section class="prose"><h2>Why it belongs in your roadmap</h2><p>${paper.why}</p></section>
+    ${paperDetails(paper.id)}
     <h2>Claim boundary</h2><div class="claim-grid"><div class="claim demo"><strong>What the work demonstrates</strong><p>${paper.demonstrated}</p></div><div class="claim not"><strong>What it does not demonstrate</strong><p>${paper.notDemonstrated}</p></div></div>
     <div class="grid two" style="margin-top:28px"><div class="card"><span class="tag accent">Focus while reading</span><ul>${paper.focus.map(x => `<li>${x}</li>`).join("")}</ul></div><div class="card"><span class="tag accent">Research question to extract</span><h3>${paper.question}</h3></div></div>
     <div class="callout warning"><strong>Interpretation checkpoint</strong><p>${paper.caveat}</p></div>
@@ -501,7 +503,7 @@ function bindPage() {
     quiz.querySelectorAll("button")[correct].classList.add("correct");
     quiz.nextElementSibling.textContent = i === correct ? "Correct. AUC is threshold-independent ranking performance on a specified dataset; it is not a prevention rate." : "Not quite. AUC does not directly give a prevention rate, false-positive rate, or general alignment probability.";
   })));
-  bindQuestionBuilder(); bindNotes(); bindProtocol(); bindTrace(); bindMachine();
+  bindQuestionBuilder(); bindNotes(); bindProtocol(); bindTrace(); bindMachine(); bindPaperDetails();
   document.querySelectorAll("[data-reflection]").forEach(input => input.addEventListener("input", () => {
     const id = input.dataset.reflection; state.notes[id] = { ...(state.notes[id] || {}), reflection: input.value }; save();
   }));

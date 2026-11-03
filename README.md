@@ -4,9 +4,11 @@ Interactive research learning site for AI control, agent safety, sabotage monito
 
 Live site: https://anoopdesai7.github.io/tara-agents/
 
-Buildless source: `index.html`, `styles.css`, and `app.js`. Preview with `python3 -m http.server 4173`. Validate JavaScript with `node --check app.js`.
+Buildless source: `index.html`, `styles.css`, `app.js`, and `paper-details.js`. Preview with `python3 -m http.server 4173`. Validate JavaScript with `node --check app.js` and `node --check paper-details.js`.
 
-GitHub Pages publishes pushes to `main` using `.github/workflows/pages.yml`. Only the three public site files enter the deployment artifact.
+GitHub Pages publishes pushes to `main` using `.github/workflows/pages.yml`. Only the four public site files enter the deployment artifact.
+
+Each of the six paper modules includes a four-stage method walkthrough, a result selector with metric interpretation, an expandable reasoning exercise, and separate proposed experiments for temporal enforcement and sabotage monitoring. Primary-source section/table references accompany the selected findings. Proposed experiments are labeled separately from reported results.
 
 Reading progress and paper notes stay in the visitor’s browser and do not sync across devices. The reading template supports Markdown export. The protocol simulator is illustrative, not an empirical safety prediction.
 
