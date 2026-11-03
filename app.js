@@ -1,4 +1,4 @@
-import { paperDetails, bindPaperDetails } from "./paper-details.js";
+import { paperDetails, bindPaperDetails } from "./paper-details.js?v=paper-labs-2";
 const STORE = "tara-field-guide-v1";
 
 const papers = [
@@ -224,6 +224,7 @@ function homePage() {
       <p class="lede">A field guide to AI control, sabotage monitoring, power-seeking, agent harnesses, and formal methods—built around questions you can actually test.</p>
       <div class="hero-actions"><a class="button primary" href="#/research">Begin the path →</a><a class="button ghost" href="#/papers">Browse the papers</a></div>
     </section>
+    <div class="callout"><strong>Paper labs: methods, results, and metrics you can change</strong><p>Open a paper, then use its Method lab or Metrics lab buttons. Try the threshold slider to see false alarms and missed attacks change.</p><a class="button primary" href="#/paper/jevact">Try the JevAct labs →</a></div>
     <div class="stat-strip">
       <div class="stat"><strong>6</strong><span>annotated core papers</span></div>
       <div class="stat"><strong>3</strong><span>passes for critical reading</span></div>
@@ -373,7 +374,7 @@ function paperPage(paper) {
   const index = papers.indexOf(paper), prev = papers[index - 1], next = papers[index + 1];
   return `<article class="page"><header class="paper-hero"><div class="eyebrow">Core paper · ${paper.number}</div><h1 class="paper-title">${paper.title}</h1><p class="lede">${paper.oneLine}</p>
     <div class="page-meta"><span class="tag accent">${paper.year}</span><span class="tag">${paper.venue}</span><span class="tag">${paper.authors}</span></div>
-    <div class="hero-actions"><a class="button primary" href="${paper.link}" target="_blank" rel="noreferrer">Read primary source ↗</a><a class="button ghost" href="${paper.pdf}" target="_blank" rel="noreferrer">Open paper / PDF</a></div></header>
+    <div class="hero-actions"><button class="button primary" data-jump="methodLab">Method lab ↓</button><button class="button primary" data-jump="metricsLab">Metrics lab ↓</button><button class="button" data-jump="researchLab">Your research ideas ↓</button><a class="button ghost" href="${paper.link}" target="_blank" rel="noreferrer">Primary source ↗</a></div><p class="lab-version">Interactive paper labs · updated version 2</p></header>
     <section class="prose"><h2>Why it belongs in your roadmap</h2><p>${paper.why}</p></section>
     ${paperDetails(paper.id)}
     <h2>Claim boundary</h2><div class="claim-grid"><div class="claim demo"><strong>What the work demonstrates</strong><p>${paper.demonstrated}</p></div><div class="claim not"><strong>What it does not demonstrate</strong><p>${paper.notDemonstrated}</p></div></div>
@@ -488,6 +489,11 @@ function route() {
 }
 
 function bindPage() {
+  document.querySelectorAll("[data-jump]").forEach(button => button.addEventListener("click", () => {
+    const target = document.getElementById(button.dataset.jump);
+    target?.scrollIntoView({ behavior: "smooth", block: "start" });
+    target?.focus({ preventScroll: true });
+  }));
   document.querySelectorAll("[data-complete]").forEach(btn => btn.addEventListener("click", () => {
     const id = btn.dataset.complete;
     state.completed = state.completed.includes(id) ? state.completed.filter(x => x !== id) : [...state.completed, id];

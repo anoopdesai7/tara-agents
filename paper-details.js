@@ -133,17 +133,21 @@ export function paperDetails(id) {
   const d = details[id];
   if (!d) return "";
   return `<section class="paper-deep-dive" data-paper-detail="${id}">
-    <h2>Walk through the method</h2>
+    <h2 id="methodLab" tabindex="-1">Interactive method lab</h2>
     <p class="detail-intro">Select each stage to unpack the study. Paper-derived details are linked to their source; research proposals below are suggestions for your project.</p>
     <div class="interactive method-walkthrough">
       <div class="method-choices" aria-label="Method stages">${d.steps.map(([title], i) => `<button class="button small" data-method="${i}" aria-pressed="${i === 0}">${i + 1}. ${title}</button>`).join("")}</div>
       <div class="method-content" aria-live="polite"></div>
+      <div class="hero-actions"><button class="button small" data-method-prev>← Previous stage</button><button class="button small primary" data-method-next>Next stage →</button></div>
     </div>
-    <h2>Explore the results</h2>
+    ${id === "jevact" ? gateLab() : ""}
+    <h2 id="metricsLab" tabindex="-1">Interactive metrics lab</h2>
+    <p>First explore the reported findings, then change a decision threshold in the synthetic exercise below.</p>
     <div class="interactive result-explorer"><div class="field"><label for="resultSelect">Result or finding</label><select id="resultSelect">${d.results.map(([label], i) => `<option value="${i}">${label}</option>`).join("")}</select></div><div class="result-content" aria-live="polite"></div></div>
     <p class="detail-source">Primary source: <a href="${d.source}" target="_blank" rel="noreferrer">${d.locator} ↗</a>. Selected findings only; consult the source for the full setup and uncertainty.</p>
+    ${thresholdLab(id)}
     <div class="interactive"><h3>Reason it through</h3><p>${d.exercise[0]}</p><details class="reasoning-reveal"><summary>Reveal the reasoning</summary><p>${d.exercise[1]}</p></details></div>
-    <h2>Connect it to your TARA ideas</h2>
+    <h2 id="researchLab" tabindex="-1">Connect it to your TARA ideas</h2>
     <p>${d.bridge}</p>
     <div class="interactive research-connection"><span class="tag accent">Proposed experiments · not paper results</span><div class="field"><label for="researchSelect">Your research direction</label><select id="researchSelect">${d.research.map(([label], i) => `<option value="${i}">${label}</option>`).join("")}</select></div><div class="research-content" aria-live="polite"></div></div>
   </section>`;
@@ -153,11 +157,17 @@ export function bindPaperDetails() {
   const root = document.querySelector("[data-paper-detail]");
   if (!root) return;
   const d = details[root.dataset.paperDetail];
+  let stage = 0;
   const method = index => {
+    stage = index;
     const [title, body] = d.steps[index];
     root.querySelectorAll("[data-method]").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.method === index)));
     root.querySelector(".method-content").innerHTML = `<span class="tag">Stage ${index + 1} of ${d.steps.length}</span><h3>${title}</h3><p>${body}</p>`;
+    root.querySelector("[data-method-prev]").disabled = index === 0;
+    root.querySelector("[data-method-next]").disabled = index === d.steps.length - 1;
   };
+  root.querySelector("[data-method-prev]").addEventListener("click", () => method(Math.max(0, stage - 1)));
+  root.querySelector("[data-method-next]").addEventListener("click", () => method(Math.min(d.steps.length - 1, stage + 1)));
   root.querySelectorAll("[data-method]").forEach(b => b.addEventListener("click", () => method(+b.dataset.method)));
   const results = () => {
     const [label, value, metric, interpretation] = d.results[+root.querySelector("#resultSelect").value];
@@ -170,4 +180,54 @@ export function bindPaperDetails() {
   root.querySelector("#resultSelect").addEventListener("change", results);
   root.querySelector("#researchSelect").addEventListener("change", research);
   method(0); results(); research();
+  bindThresholdLab(root); bindGateLab(root);
+}
+
+function thresholdLab(id) {
+  return `<div class="interactive threshold-lab">
+    <div class="interactive-head"><div><h3>Try it: choose a monitor threshold</h3><p>Move the slider. A trace is flagged when its suspicion score is at least the threshold.</p></div><span class="tag">Synthetic teaching data</span></div>
+    <p>These 12 scored traces are invented for this exercise, not measurements from the paper. ${id === "power-seeking" ? "This illustrates an empirical monitoring metric; it is not a numerical test of the power-seeking theorem." : "Use this to understand the measurement choices in your proposed monitoring study."}</p>
+    <div class="range-row"><label for="labThreshold">Flag threshold</label><input id="labThreshold" type="range" min="0" max="100" value="60" step="1"><output id="thresholdOutput" for="labThreshold">60</output></div>
+    <div class="metric-grid" aria-live="polite"></div>
+    <div class="trace-dots" aria-label="Decisions for the synthetic traces"></div>
+    <p class="threshold-explanation" aria-live="polite"></p>
+    <details class="reasoning-reveal"><summary>Show formulas and interpretation</summary><p>Precision = true positives / all flags. Recall = true positives / all attacks. False-positive rate = false alarms / all benign traces. A lower threshold usually catches more attacks and raises more false alarms. AUC is not calculated from one threshold. Detection alone also does not establish that harm was prevented.</p></details>
+  </div>`;
+}
+
+function bindThresholdLab(root) {
+  const lab = root.querySelector(".threshold-lab");
+  const scores = [{score:10,attack:false},{score:20,attack:false},{score:35,attack:false},{score:45,attack:false},{score:65,attack:false},{score:80,attack:false},{score:30,attack:true},{score:55,attack:true},{score:60,attack:true},{score:75,attack:true},{score:85,attack:true},{score:95,attack:true}];
+  const update = () => {
+    const threshold = +lab.querySelector("input").value;
+    const tp = scores.filter(t => t.attack && t.score >= threshold).length;
+    const fp = scores.filter(t => !t.attack && t.score >= threshold).length;
+    const fn = 6 - tp, tn = 6 - fp;
+    lab.querySelector("output").value = threshold;
+    const precision = tp + fp ? `${Math.round(tp / (tp + fp) * 100)}%` : "Undefined (no flags)";
+    lab.querySelector(".metric-grid").innerHTML = [["Attacks caught",`${tp} / 6`],["False alarms",`${fp} / 6`],["Precision",precision],["Recall",`${Math.round(tp / 6 * 100)}%`],["False-positive rate",`${Math.round(fp / 6 * 100)}%`],["Attacks missed",`${fn} / 6`]].map(([label,value]) => `<div class="metric-tile"><span>${label}</span><strong>${value}</strong></div>`).join("");
+    lab.querySelector(".trace-dots").innerHTML = scores.map(t => `<span class="trace-chip ${t.score >= threshold ? "flagged" : ""}">${t.attack ? "Attack" : "Benign"} ${t.score} → ${t.score >= threshold ? "FLAG" : "pass"}</span>`).join("");
+    lab.querySelector(".threshold-explanation").textContent = `At threshold ${threshold}, the monitor catches ${tp} attacks, misses ${fn}, flags ${fp} benign traces, and correctly passes ${tn} benign traces. Choose your threshold on calibration data, then evaluate it on held-out traces.`;
+  };
+  lab.querySelector("input").addEventListener("input", update); update();
+}
+
+function gateLab() {
+  return `<div class="interactive gate-lab"><h3>Try it: repeated unauthorized proposals</h3><p>Illustrative stress test inspired by the paper’s revision loop. Each proposal attempts the same unauthorized write. This is not a reported experiment.</p><div class="field"><label for="gatePolicy">Gate behavior</label><select id="gatePolicy"><option value="bounded">Bounded correction: two revisions</option><option value="closed">Fail closed: keep blocking</option></select></div><button class="button primary" id="proposeWrite">Propose unauthorized write</button><button class="button" id="resetGate">Reset trace</button><div class="gate-trace" aria-live="polite"></div><p class="gate-state" aria-live="polite"></p></div>`;
+}
+
+function bindGateLab(root) {
+  const lab = root.querySelector(".gate-lab"); if (!lab) return;
+  let count = 0, executed = false;
+  const reset = () => { count = 0; executed = false; lab.querySelector(".gate-trace").innerHTML = ""; lab.querySelector(".gate-state").textContent = "No proposal yet. Try three consecutive proposals."; lab.querySelector("#proposeWrite").disabled = false; };
+  lab.querySelector("#proposeWrite").addEventListener("click", () => {
+    count++;
+    executed = lab.querySelector("select").value === "bounded" && count > 2;
+    const verdict = executed ? "EXECUTED unchecked: revision budget exhausted" : "BLOCKED: unauthorized; revision requested";
+    lab.querySelector(".gate-trace").insertAdjacentHTML("beforeend", `<div class="trace-chip ${executed ? "flagged" : ""}">Proposal ${count}: ${verdict}</div>`);
+    lab.querySelector(".gate-state").textContent = executed ? "The environment has now changed despite missing authorization. Bounded correction did not enforce the invariant." : "No unauthorized effect has executed. Blocking can preserve the rule but may prevent task completion.";
+    lab.querySelector("#proposeWrite").disabled = executed;
+  });
+  lab.querySelector("select").addEventListener("change", reset);
+  lab.querySelector("#resetGate").addEventListener("click", reset); reset();
 }
