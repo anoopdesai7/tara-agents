@@ -152,7 +152,7 @@ const navGroups = [
   { label: "Start here", items: [
     ["home", "⌂", "Field guide"], ["research", "◈", "What research means"], ["reading", "≡", "How to read papers"], ["template", "□", "Reading template"]
   ]},
-  { label: "Core papers", items: [["papers", "◎", "Paper library"], ...papers.map(p => [`paper/${p.id}`, "·", p.short])]},
+  { label: "Core papers", items: [["papers", "◎", "Paper library"], ...papers.map(p => [`paper/${p.id}`, "·", p.short]), ["impactbench-guide", "◇", "ImpactBench guide"]]},
   { label: "Research terrain", items: [
     ["controls", "⛉", "Controls & policies"], ["monitoring", "⌁", "Sabotage monitoring"], ["power", "↗", "Power-seeking"], ["harnesses", "⌘", "Agent harnesses"], ["formal", "∀", "Formal methods"]
   ]}
@@ -474,6 +474,7 @@ const routes = { home: homePage, research: researchPage, reading: readingPage, t
 
 function route() {
   const path = location.hash.replace(/^#\/?/, "") || "home";
+  if (path === "impactbench-guide") { window.location.href = "./impactbench.html"; return; }
   currentRoute = path;
   let html;
   if (path.startsWith("paper/")) {
