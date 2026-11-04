@@ -23,10 +23,10 @@ jobs:
         with:
           node-version: 22
       - name: Check JavaScript
-        run: node --check app.js && node --check paper-details.js && node --check paper-labs.js
+        run: node --check app.js && node --check paper-details.js && node --check paper-labs.js && node --check impactbench.js
       - uses: actions/configure-pages@v5
       - name: Prepare public files
-        run: mkdir _site && cp index.html styles.css app.js paper-details.js paper-labs.js impactbench.html _site/
+        run: mkdir _site && cp index.html styles.css app.js paper-details.js paper-labs.js impactbench.js impactbench.html _site/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

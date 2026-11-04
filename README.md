@@ -4,9 +4,11 @@ Interactive research learning site for AI control, agent safety, sabotage monito
 
 Live site: https://anoopdesai7.github.io/tara-agents/
 
-Buildless source: `index.html`, `styles.css`, `app.js`, `paper-details.js`, and `paper-labs.js`. Preview with `python3 -m http.server 4173`. Validate JavaScript with `node --check app.js`, `node --check paper-details.js`, and `node --check paper-labs.js`.
+Buildless source: `index.html`, `styles.css`, `app.js`, `paper-details.js`, `paper-labs.js`, and `impactbench.js`. Preview with `python3 -m http.server 4173`. Validate JavaScript with `node --check app.js`, `node --check paper-details.js`, `node --check paper-labs.js`, and `node --check impactbench.js`.
 
-GitHub Pages publishes pushes to `main` using `.github/workflows/pages.yml`. Only the five public site files enter the deployment artifact.
+GitHub Pages publishes pushes to `main` using `.github/workflows/pages.yml`. The public artifact contains the SPA source modules plus `impactbench.html`, a compatibility redirect from the old standalone URL to `#/impactbench`.
+
+ImpactBench is integrated as a native field-guide module with shared navigation, themes, typography, progress, jump links, local reflection notes, and paper-style interactive labs. ImpactBench-derived methods and proposed TARA experiments are labeled separately.
 
 Each of the six paper modules includes a four-stage method walkthrough, a result selector with metric interpretation, an expandable reasoning exercise, and separate proposed experiments for temporal enforcement and sabotage monitoring. Primary-source section/table references accompany the selected findings. Proposed experiments are labeled separately from reported results.
 

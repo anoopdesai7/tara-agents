@@ -1,4 +1,5 @@
 import { paperDetails, bindPaperDetails } from "./paper-details.js?v=paper-labs-3";
+import { impactBenchPage, bindImpactBench } from "./impactbench.js?v=impactbench-spa-1";
 const STORE = "tara-field-guide-v1";
 
 const papers = [
@@ -152,7 +153,7 @@ const navGroups = [
   { label: "Start here", items: [
     ["home", "⌂", "Field guide"], ["research", "◈", "What research means"], ["reading", "≡", "How to read papers"], ["template", "□", "Reading template"]
   ]},
-  { label: "Core papers", items: [["papers", "◎", "Paper library"], ...papers.map(p => [`paper/${p.id}`, "·", p.short]), ["impactbench-guide", "◇", "ImpactBench guide"]]},
+  { label: "Core papers", items: [["papers", "◎", "Paper library"], ...papers.map(p => [`paper/${p.id}`, "·", p.short]), ["impactbench", "◇", "ImpactBench methods"]]},
   { label: "Research terrain", items: [
     ["controls", "⛉", "Controls & policies"], ["monitoring", "⌁", "Sabotage monitoring"], ["power", "↗", "Power-seeking"], ["harnesses", "⌘", "Agent harnesses"], ["formal", "∀", "Formal methods"]
   ]}
@@ -367,6 +368,7 @@ function papersPage() {
       <tr><td>Strengthening Red Teams</td><td>Attack-scaffold study</td><td>Attack-policy components</td><td>Component effects may be environment-specific</td></tr>
       <tr><td>JevAct</td><td>Runtime system evaluation</td><td>Proposed action / termination</td><td>Reliability ≠ adversarial safety guarantee</td></tr>
     </tbody></table>
+    <div class="callout"><strong>Methods companion</strong><p>ImpactBench adds a reusable human-impact evaluation pipeline. The guide keeps the source method separate from proposed TARA experiments on runtime constraints and sabotage monitoring.</p><a class="button primary" href="#/impactbench">Open the ImpactBench guide →</a></div>
   </article>`;
 }
 
@@ -470,11 +472,11 @@ function formalPage() {
   `, "formal");
 }
 
-const routes = { home: homePage, research: researchPage, reading: readingPage, template: templatePage, papers: papersPage, controls: controlsPage, monitoring: monitoringPage, power: powerPage, harnesses: harnessesPage, formal: formalPage };
+const routes = { home: homePage, research: researchPage, reading: readingPage, template: templatePage, papers: papersPage, impactbench: () => impactBenchPage(esc((state.notes.impactbench || {}).reflection || ""), completion("impactbench")), controls: controlsPage, monitoring: monitoringPage, power: powerPage, harnesses: harnessesPage, formal: formalPage };
 
 function route() {
   const path = location.hash.replace(/^#\/?/, "") || "home";
-  if (path === "impactbench-guide") { window.location.href = "./impactbench.html"; return; }
+  if (path === "impactbench-guide") { history.replaceState(null, "", "#/impactbench"); return route(); }
   currentRoute = path;
   let html;
   if (path.startsWith("paper/")) {
@@ -510,7 +512,7 @@ function bindPage() {
     quiz.querySelectorAll("button")[correct].classList.add("correct");
     quiz.nextElementSibling.textContent = i === correct ? "Correct. AUC is threshold-independent ranking performance on a specified dataset; it is not a prevention rate." : "Not quite. AUC does not directly give a prevention rate, false-positive rate, or general alignment probability.";
   })));
-  bindQuestionBuilder(); bindNotes(); bindProtocol(); bindTrace(); bindMachine(); bindPaperDetails();
+  bindQuestionBuilder(); bindNotes(); bindProtocol(); bindTrace(); bindMachine(); bindPaperDetails(); bindImpactBench();
   document.querySelectorAll("[data-reflection]").forEach(input => input.addEventListener("input", () => {
     const id = input.dataset.reflection; state.notes[id] = { ...(state.notes[id] || {}), reflection: input.value }; save();
   }));
