@@ -19,3 +19,7 @@ Reading progress and paper notes stay in the visitor’s browser and do not sync
 Paper modules link primary sources and distinguish demonstrated results from broader interpretations. The IBM paper is Shoham et al., *Think Before You Act: Decision Gate for LLM Agents* (arXiv:2610.38620).
 
 Moved from `first-moves/public/tara` at the owner’s request. Repository visibility is not authorization to edit or publish; use the repository explicitly designated for the task.
+
+## Current research focus: Idea 2 — Executable verification
+
+[Open the interactive Idea 2 research deep dive](https://anoopdesai7.github.io/tara-agents/idea2.html). This page compares read-only LLM monitoring with executable verification and independent audit evidence, provides an interactive budget planner, an evaluation design, and a curated reading shelf from Elvis Saravia's 2026 eval-paper list. The existing six core-paper labs remain unchanged.
